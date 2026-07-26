@@ -49,9 +49,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const isKeyPresent = (fullKey) => {
+const isKeyPresent = (fullKey, obj) => {
   if (!___WEBPACK_IMPORTED_MODULE_0__.ACCESSORS[fullKey]) {
-    const [key, namespace] = fullKey.split(_namespace__WEBPACK_IMPORTED_MODULE_1__.NAMESPACE_DELIMITER);
+    const [key, namespace] = (0,_namespace__WEBPACK_IMPORTED_MODULE_1__.splitFullKey)(fullKey);
     throw new Error (`Trying to access "${key}" key in "${namespace}" namespace, but it doesn't exist`);
   }
 
@@ -459,7 +459,10 @@ __webpack_require__.r(__webpack_exports__);
 function updateFromLocalStorage(state) {
   const stored = {};
   for (const key in state) {
-    stored[key] = localStorage.getItem(key);
+    const value = localStorage.getItem(key);
+    if (value !== null) {
+      stored[key] = value;
+    }
   }
 
   return Object.assign(state, stored);

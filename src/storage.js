@@ -1,7 +1,10 @@
 function updateFromLocalStorage(state) {
   const stored = {};
   for (const key in state) {
-    stored[key] = localStorage.getItem(key);
+    const value = localStorage.getItem(key);
+    if (value !== null) {
+      stored[key] = value;
+    }
   }
 
   return Object.assign(state, stored);

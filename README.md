@@ -1,5 +1,5 @@
 # Varstor
-State manager for web applications and browser extensions, employing reactivity, wrapping, and uniting the usage of different storages' values and common variables into a simple universal interface.
+State manager for web applications and webextensions, employing reactivity, wrapping, and uniting the usage of different storages' values and common variables into a simple universal interface.
 
 ## How to install and prepare
 Install the library through
