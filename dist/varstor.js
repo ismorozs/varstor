@@ -12,33 +12,6 @@ return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/error.js"
-/*!**********************!*\
-  !*** ./src/error.js ***!
-  \**********************/
-(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   isKeyPresent: () => (/* binding */ isKeyPresent)
-/* harmony export */ });
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! . */ "./src/index.js");
-/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/namespace.js");
-
-
-
-const isKeyPresent = (fullKey, obj) => {
-  if (!___WEBPACK_IMPORTED_MODULE_0__.ACCESSORS[fullKey]) {
-    const [key, namespace] = (0,_namespace__WEBPACK_IMPORTED_MODULE_1__.splitFullKey)(fullKey);
-    throw new Error (`Trying to access "${key}" key in "${namespace}" namespace, but it doesn't exist`);
-  }
-
-  return true;
-}
-
-
-/***/ },
-
 /***/ "./src/helpers.js"
 /*!************************!*\
   !*** ./src/helpers.js ***!
@@ -113,7 +86,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _storage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./storage */ "./src/storage.js");
 /* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./src/helpers.js");
 /* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./namespace */ "./src/namespace.js");
-/* harmony import */ var _error__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./error */ "./src/error.js");
+/* harmony import */ var _validation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./validation */ "./src/validation.js");
 
 
 
@@ -147,6 +120,7 @@ async function addState (namespace, initialState, isPersistent) {
 
   const accessors = {};
   for (const key in initialState) {
+    _validation__WEBPACK_IMPORTED_MODULE_3__.isValid.Defining(namespace(key));
     accessors[namespace(key)] = setupValue(
       namespace(key),
       namespacedValues[namespace(key)],
@@ -298,7 +272,8 @@ function setState (namespace, changes) {
     resetAllState();
   } else {
     for (const [k,v] of Object.entries(changes)) {
-      (0,_error__WEBPACK_IMPORTED_MODULE_3__.isKeyPresent)(namespace(k)) && ACCESSORS[namespace(k)].set(v);
+      _validation__WEBPACK_IMPORTED_MODULE_3__.isValid.Setting(namespace(k));
+      ACCESSORS[namespace(k)].set(v);
     };
   }
 
@@ -376,7 +351,6 @@ function createStore (_namespace) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   NAMESPACE_DELIMITER: () => (/* binding */ NAMESPACE_DELIMITER),
 /* harmony export */   addNamespace: () => (/* binding */ addNamespace),
 /* harmony export */   getByNamespace: () => (/* binding */ getByNamespace),
 /* harmony export */   namespacify: () => (/* binding */ namespacify),
@@ -385,7 +359,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers */ "./src/helpers.js");
 
 
-const NAMESPACE_DELIMITER = ":";
+const NAMESPACE_DELIMITER = "::";
 
 function addNamespace(namespace, str) {
   return `${namespace}${(0,_helpers__WEBPACK_IMPORTED_MODULE_0__.isString)(str) && NAMESPACE_DELIMITER || ""}${str || ""}`;
@@ -461,6 +435,50 @@ function setStorageValue(storageType, key, value) {
   UPDATE_STATE: updateFromLocalStorage,
   SET_VALUE: setStorageValue,
 });
+
+
+/***/ },
+
+/***/ "./src/validation.js"
+/*!***************************!*\
+  !*** ./src/validation.js ***!
+  \***************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   isValid: () => (/* binding */ isValid)
+/* harmony export */ });
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! . */ "./src/index.js");
+/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/namespace.js");
+
+
+
+
+const isValid = {
+  Setting: (fullKey) => {
+    if (!___WEBPACK_IMPORTED_MODULE_0__.ACCESSORS[fullKey]) {
+      const [key, namespace] = (0,_namespace__WEBPACK_IMPORTED_MODULE_1__.splitFullKey)(fullKey);
+      throw new Error(
+        `Setting "${key}" key in "${namespace}" namespace. DOES NOT EXIST`,
+      );
+    }
+
+    return true;
+  },
+
+  Defining: (fullKey) => {
+    if (___WEBPACK_IMPORTED_MODULE_0__.ACCESSORS[fullKey]) {
+      const [key, namespace] = (0,_namespace__WEBPACK_IMPORTED_MODULE_1__.splitFullKey)(fullKey);
+      throw new Error(
+        `Redefining "${key}" key in "${namespace}" namespace. ALREADY DEFINED`,
+      );
+    }
+
+    return true;
+  }
+
+};
 
 
 /***/ }

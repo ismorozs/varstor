@@ -14,8 +14,8 @@ import {
 } from "./namespace";
 
 import {
-  isKeyPresent
-} from './error';
+  isValid
+} from './validation';
 
 const STATE = {};
 export const ACCESSORS = {};
@@ -42,6 +42,7 @@ async function addState (namespace, initialState, isPersistent) {
 
   const accessors = {};
   for (const key in initialState) {
+    isValid.Defining(namespace(key));
     accessors[namespace(key)] = setupValue(
       namespace(key),
       namespacedValues[namespace(key)],
@@ -193,7 +194,8 @@ function setState (namespace, changes) {
     resetAllState();
   } else {
     for (const [k,v] of Object.entries(changes)) {
-      isKeyPresent(namespace(k)) && ACCESSORS[namespace(k)].set(v);
+      isValid.Setting(namespace(k));
+      ACCESSORS[namespace(k)].set(v);
     };
   }
 

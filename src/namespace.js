@@ -2,7 +2,7 @@ import {
   getKeys, isString, toCamelCase
 } from './helpers';
 
-export const NAMESPACE_DELIMITER = ":";
+const NAMESPACE_DELIMITER = "::";
 
 export function addNamespace(namespace, str) {
   return `${namespace}${isString(str) && NAMESPACE_DELIMITER || ""}${str || ""}`;
