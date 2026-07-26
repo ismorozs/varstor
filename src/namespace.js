@@ -8,18 +8,17 @@ export function addNamespace(namespace, str) {
   return `${namespace}${isString(str) && NAMESPACE_DELIMITER || ""}${str || ""}`;
 }
 
-export function getNamespace(str) {
-  return (
-    str.split(NAMESPACE_DELIMITER).slice(0, -1).join(NAMESPACE_DELIMITER)
-  );
-}
+export function splitFullKey (str) {
+  const segments = str.split(NAMESPACE_DELIMITER);
 
-export function  getKey (str) {
-  return str.split(NAMESPACE_DELIMITER).slice(-1)[0];
+  return [
+    segments.slice(-1)[0],
+    segments.slice(0, -1).join(NAMESPACE_DELIMITER),
+  ];
 }
 
 export function getByNamespace(str, obj) {
-  const namespace = getNamespace(str) + NAMESPACE_DELIMITER;
+  const namespace = splitFullKey(str)[1] + NAMESPACE_DELIMITER;
 
   return Object.fromEntries(
     Object.entries(obj)

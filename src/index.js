@@ -8,8 +8,7 @@ import {
 
 import {
   addNamespace,
-  getNamespace,
-  getKey,
+  splitFullKey,
   namespacify,
   getByNamespace,
 } from "./namespace";
@@ -73,7 +72,7 @@ function setupValue (key, value, defaultValue, storageType) {
 }
 
 function setupDependencies(computedValueName, computeFn) {
-  const namespace = getNamespace(computedValueName);
+  const [, namespace] = splitFullKey(computedValueName);
   const paramNames = getParamNames(computeFn).map((name) => addNamespace(namespace, name));
   COMPUTED_ARGUMENTS[computedValueName] = paramNames;
 
@@ -90,7 +89,7 @@ function getArguments(computedName) {
   const values = getNamespaceValues(computedName);
   
   return COMPUTED_ARGUMENTS[computedName]
-    .map((name) => values[getKey(name)])
+    .map((name) => values[splitFullKey(name)[0]])
     .concat(values);
 }
 

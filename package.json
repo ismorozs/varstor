@@ -1,20 +1,36 @@
 {
   "name": "varstor",
-  "version": "0.0.1",
-  "description": "Library for managing the state of applications, employing reactivity, and seamless usage of storage with a simple unified interface",
+  "version": "0.0.2",
+  "description": "State manager for web applications and browser extensions, employing reactivity, wrapping, and uniting the usage of different storages' values and common variables into a simple universal interface",
   "license": "MIT",
   "author": "Igor Morozov <ismorozs@gmail.com>",
   "main": "./dist/varstor.js",
+  "exports": {
+    ".": "./dist/varstor.js",
+    "./webextension": "./dist/varstor-webextension.js"
+  },
   "scripts": {
     "start": "webpack",
     "build": "webpack --env production"
   },
   "devDependencies": {
     "minimizer-webpack-plugin": "5.6.1",
+    "webextension-polyfill": "0.12.0",
     "webpack": "5.108.4",
     "webpack-cli": "7.2.1"
   },
   "homepage": "https://github.com/ismorozs/varstor",
   "repository": "https://github.com/ismorozs/varstor.git",
-  "bugs": "https://github.com/ismorozs/varstor/issues"
+  "bugs": "https://github.com/ismorozs/varstor/issues",
+  "keywords": [
+    "webextension",
+    "extension",
+    "reactivity",
+    "state",
+    "store",
+    "storage",
+    "reactive",
+    "management",
+    "development"
+  ]
 }

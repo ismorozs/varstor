@@ -2,9 +2,12 @@ const MinimizerPlugin = require("minimizer-webpack-plugin");
 
 module.exports = (env) => {
   const options = {
-    entry: "./src/index.js",
+    entry: {
+      varstor: "./src/index.js",
+      "varstor-webextension": "./src/webextension.js",
+    },
     output: {
-      filename: "varstor.js",
+      filename: ({ chunk }) => `./${chunk.name}.js`,
       library: "Varstor",
       libraryTarget: "umd",
       libraryExport: "default",
@@ -25,7 +28,7 @@ module.exports = (env) => {
       minimize: true,
       minimizer: [new MinimizerPlugin()],
     };
-    options.output.filename = "varstor.min.js";
+    options.output.filename = ({ chunk }) => `./${chunk.name}.min.js`;
   }
 
   return options;
