@@ -1,6 +1,6 @@
 {
   "name": "varstor",
-  "version": "0.0.6",
+  "version": "0.2.6",
   "description": "State manager for web applications and webextensions, employing reactivity, wrapping, and uniting the usage of different storages' values and common variables into a simple universal interface",
   "license": "MIT",
   "author": "Igor Morozov <ismorozs@gmail.com>",

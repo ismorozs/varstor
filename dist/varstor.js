@@ -48,7 +48,7 @@ function isArray(x) {
 }
 
 function getParamNames(fn) {
-  const fnStr = fn.toString().replace(STRIP_COMMENTS, "");
+  const fnStr = fn.toString().replace(STRIP_COMMENTS, "").split("=>")[0];
   const names = fnStr
     .slice(fnStr.indexOf("(") + 1, fnStr.indexOf(")"))
     .match(ARGUMENT_NAMES);
