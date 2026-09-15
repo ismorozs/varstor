@@ -58,7 +58,7 @@ function isFunction(x) {
 }
 
 function isObject(x) {
-  return typeof x === "object";
+  return Object.prototype.toString.call(x) === "[object Object]";
 }
 
 function isString(x) {
@@ -195,7 +195,7 @@ function getArguments(computedName) {
     .concat(values);
 }
 
-function createAccessor(key, value, storageType) {
+function createAccessor(key, storageType) {
   const accessor = () => STATE[key].value;
 
   Object.assign(accessor, {
@@ -280,7 +280,7 @@ function getState(namespace, arg) {
 }
 
 function getNamespaceValues(namespace) {
-  return (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.getKeys)((0,_namespace__WEBPACK_IMPORTED_MODULE_2__.getByNamespace)(namespace, STATE), "value");
+  return recreateStructure((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.getKeys)((0,_namespace__WEBPACK_IMPORTED_MODULE_2__.getByNamespace)(namespace, STATE), "value"));
 }
 
 function getNamespaceAccessors (namespace, cb) {
@@ -323,6 +323,26 @@ function removeStateListener(namespace, observables, cb) {
   );
 
   return createStore(namespace());
+}
+
+function recreateStructure (value) {
+  let newValue = value;
+
+  if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isArray)(value)) {
+    newValue = [];
+    value.forEach((v) => newValue.push(recreateStructure(v)));
+    return newValue;
+  }
+
+  if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isObject)(value)) {
+    newValue = {};
+    for (let key in value) {
+      newValue[key] = recreateStructure(value[key]);
+    }
+    return newValue;
+  }
+
+  return newValue;
 }
 
 function main () {

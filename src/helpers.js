@@ -6,7 +6,7 @@ export function isFunction(x) {
 }
 
 export function isObject(x) {
-  return typeof x === "object";
+  return Object.prototype.toString.call(x) === "[object Object]";
 }
 
 export function isString(x) {

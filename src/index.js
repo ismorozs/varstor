@@ -94,7 +94,7 @@ function getArguments(computedName) {
     .concat(values);
 }
 
-function createAccessor(key, value, storageType) {
+function createAccessor(key, storageType) {
   const accessor = () => STATE[key].value;
 
   Object.assign(accessor, {
@@ -179,7 +179,7 @@ function getState(namespace, arg) {
 }
 
 function getNamespaceValues(namespace) {
-  return getKeys(getByNamespace(namespace, STATE), "value");
+  return recreateStructure(getKeys(getByNamespace(namespace, STATE), "value"));
 }
 
 function getNamespaceAccessors (namespace, cb) {
@@ -222,6 +222,26 @@ function removeStateListener(namespace, observables, cb) {
   );
 
   return createStore(namespace());
+}
+
+function recreateStructure (value) {
+  let newValue = value;
+
+  if (isArray(value)) {
+    newValue = [];
+    value.forEach((v) => newValue.push(recreateStructure(v)));
+    return newValue;
+  }
+
+  if (isObject(value)) {
+    newValue = {};
+    for (let key in value) {
+      newValue[key] = recreateStructure(value[key]);
+    }
+    return newValue;
+  }
+
+  return newValue;
 }
 
 function main () {
