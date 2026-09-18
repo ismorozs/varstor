@@ -18,8 +18,8 @@ function isStorageAvailable(storageType) {
   return storageType;
 }
 
-function setStorageValue(storageType, key, value) {
-  window.localStorage.setItem(key, value);
+async function setStorageValue(storageType, key, value) {
+  await window.localStorage.setItem(key, value);
   return false;
 }
 

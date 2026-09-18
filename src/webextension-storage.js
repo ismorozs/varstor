@@ -22,8 +22,8 @@ async function updateStateFromStorage(state, type) {
   return Object.assign(state, await browser.storage[type].get());
 }
 
-function setStorageValue(type, key, value) {
-  browser.storage[type].set({ [key]: value });
+async function setStorageValue(type, key, value) {
+  await browser.storage[type].set({ [key]: value });
   return true;
 }
 

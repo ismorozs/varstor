@@ -178,7 +178,7 @@ function createAccessor(key, storageType) {
   Object.assign(accessor, {
     valueOf: () => STATE[key].value,
     toString: () => STATE[key].value,
-    set: (value) => setValue(key, value, storageType),
+    set: async (value) => await setValue(key, value, storageType),
     onChange: (cb) => STATE[key].listeners.push(cb),
     removeListener: (removeCb) =>
       (STATE[key].listeners = STATE[key].listeners.filter(
@@ -198,9 +198,9 @@ function createAccessor(key, storageType) {
   });
 }
 
-function setValue (key, value, storageType) {
+async function setValue (key, value, storageType) {
   if (STORAGE.IS_AVAILABE(storageType)) {
-    const isAutoUpdate = STORAGE.SET_VALUE(storageType, key, value);
+    const isAutoUpdate = await STORAGE.SET_VALUE(storageType, key, value);
     if (isAutoUpdate) {
       return;
     }
@@ -225,7 +225,7 @@ function onStateChange (changes) {
   }
 
   for (const key in realChanges) {
-    STATE[key].listeners.forEach((cb) => cb(STATE[key].value, getNamespaceValues(key), realChanges[key]));
+    STATE[key].listeners.forEach(async (cb) => await cb(STATE[key].value, getNamespaceValues(key), realChanges[key]));
   }
 }
 
@@ -265,7 +265,7 @@ function getNamespaceAccessors (namespace, cb) {
   return cb.call(null, accessors, createStore(namespace()));
 }
 
-function setState (namespace, changes) {
+async function setState (namespace, changes) {
   const noKeys = !Object.keys(changes).length;
 
   if (noKeys) {
@@ -273,7 +273,7 @@ function setState (namespace, changes) {
   } else {
     for (const [k,v] of Object.entries(changes)) {
       _validation__WEBPACK_IMPORTED_MODULE_3__.isValid.Setting(namespace(k));
-      ACCESSORS[namespace(k)].set(v);
+      await ACCESSORS[namespace(k)].set(v);
     };
   }
 
@@ -349,7 +349,7 @@ function createStore (_namespace) {
     add: (state) => addState(namespace, state, false),
     addPersistent: (state) => addState(namespace, state, true),
     get: (arg) => getState(namespace, arg),
-    set: (changes) => setState(namespace, changes),
+    set: async (changes) => await setState(namespace, changes),
     resetAll: () => resetAllState(namespace),
     onChange: (keys, cb) => addStateLitener(namespace, keys, cb),
     removeListener: (keys, cb) => removeStateListener(namespace, keys, cb),
@@ -444,8 +444,8 @@ function isStorageAvailable(storageType) {
   return storageType;
 }
 
-function setStorageValue(storageType, key, value) {
-  window.localStorage.setItem(key, value);
+async function setStorageValue(storageType, key, value) {
+  await window.localStorage.setItem(key, value);
   return false;
 }
 
