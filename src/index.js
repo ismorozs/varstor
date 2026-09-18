@@ -69,7 +69,7 @@ function setupValue (key, value, defaultValue, storageType) {
     defaultValue,
   };
 
-  return createAccessor(key, value, storageType);
+  return createAccessor(key, storageType);
 }
 
 function setupDependencies(computedValueName, computeFn) {
