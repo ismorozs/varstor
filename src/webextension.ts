@@ -1,7 +1,10 @@
 const browser = require("webextension-polyfill/dist/browser-polyfill.min");
 
-import main from '.';
-import webextensionStorageUtils, { isBackgroundScript, isSessionStorageSupport } from './webextension-storage';
+import main from ".";
+import webextensionStorageUtils, {
+  isBackgroundScript,
+  isSessionStorageSupport,
+} from "./webextension-storage";
 
 const { onStateChange, setStorageUtils } = main;
 

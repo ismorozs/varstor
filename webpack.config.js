@@ -3,8 +3,8 @@ const MinimizerPlugin = require("minimizer-webpack-plugin");
 module.exports = (env) => {
   const options = {
     entry: {
-      varstor: "./src/index.js",
-      "varstor-webextension": "./src/webextension.js",
+      varstor: "./src/index.ts",
+      "varstor-webextension": "./src/webextension.ts",
     },
     output: {
       filename: ({ chunk }) => `./${chunk.name}.js`,
@@ -18,6 +18,20 @@ module.exports = (env) => {
 
     stats: {
       colors: true,
+    },
+
+    module: {
+      rules: [
+        {
+          test: /\.(ts|tsx)$/i,
+          loader: "ts-loader",
+          exclude: ["/node_modules/"],
+        },
+      ],
+    },
+
+    resolve: {
+      extensions: [".ts", ".js"],
     },
 
     devtool: false,

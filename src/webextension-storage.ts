@@ -4,26 +4,26 @@ export default {
   GET_TYPE: getStorageType,
   IS_AVAILABE: isStorageAvailable,
   UPDATE_STATE: updateStateFromStorage,
-  SET_VALUE: setStorageValue,
+  SET_VALUES: setStorageValue,
 };
 
-function getStorageType(isPersistent) {
+function getStorageType(isPersistent: boolean) {
   return (isBackgroundScript() && isPersistent && "local") || "session";
 }
 
-function isStorageAvailable(storageType) {
+function isStorageAvailable(storageType: string) {
   return (
     storageType === "local" ||
     (storageType === "session" && isSessionStorageSupport())
   );
 }
 
-async function updateStateFromStorage(state, type) {
+async function updateStateFromStorage(state: IStateDefault, type: string) {
   return Object.assign(state, await browser.storage[type].get());
 }
 
-async function setStorageValue(type, key, value) {
-  await browser.storage[type].set({ [key]: value });
+async function setStorageValue(type: string, changes: Record<string, any>) {
+  await browser.storage[type].set(changes);
   return true;
 }
 

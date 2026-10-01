@@ -1,10 +1,14 @@
-import { ACCESSORS } from "."
-import { splitFullKey } from "./namespace";
+import { STATE } from ".";
+import { NAMESPACE_DELIMITER } from "./constants";
 
+function splitFullKey(fullKey: string) {
+  const segments = fullKey.split(NAMESPACE_DELIMITER);
+  return [segments.slice(-1)[0], segments.join(NAMESPACE_DELIMITER)];
+}
 
 export const isValid = {
-  Setting: (fullKey) => {
-    if (!ACCESSORS[fullKey]) {
+  Setting: (fullKey: string) => {
+    if (!STATE[fullKey]) {
       const [key, namespace] = splitFullKey(fullKey);
       throw new Error(
         `Setting "${key}" key in "${namespace}" namespace. DOES NOT EXIST`,
@@ -14,8 +18,8 @@ export const isValid = {
     return true;
   },
 
-  Defining: (fullKey) => {
-    if (ACCESSORS[fullKey]) {
+  Defining: (fullKey: string) => {
+    if (STATE[fullKey]) {
       const [key, namespace] = splitFullKey(fullKey);
       throw new Error(
         `Redefining "${key}" key in "${namespace}" namespace. ALREADY DEFINED`,
@@ -23,6 +27,5 @@ export const isValid = {
     }
 
     return true;
-  }
-
+  },
 };

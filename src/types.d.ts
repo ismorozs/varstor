@@ -1,0 +1,39 @@
+type INamespace = (key?: string) => string;
+
+type IComputeFunction = (...args: any[]) => any;
+
+type IValue = {
+  key?: string;
+  fullKey?: string;
+  value?: any;
+  computeFn?: boolean | IComputeFunction;
+  dependencies: string[];
+  dependants: string[];
+  storageType: string;
+  listeners?: any[];
+  defaultValue?: any;
+  namespace: INamespace;
+};
+
+type IState = Record<string, IValue>;
+
+type IStateDefault = Record<string, any>;
+
+type IStateChange = { newValue?: any; prevValue?: any; isSame?: boolean };
+
+type IStateChanges = Record<string, IStateChange>;
+
+type IStorageFunctions = {
+  GET_TYPE: (type: boolean) => boolean | string;
+  IS_AVAILABE: (type: string) => boolean;
+  UPDATE_STATE: (state: IStateDefault, type: string) => IStateDefault;
+  SET_VALUES: (type: string, changes: Record<string, any>) => Promise<boolean>;
+};
+
+type IStateListener = (
+  changes: string[],
+  values: Record<string, any>,
+  data: IStateChanges,
+) => {};
+
+type IStateListeners = Record<string, IStateListener[]>;
