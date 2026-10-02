@@ -12,6 +12,8 @@ import {
   forEach,
 } from "./helpers";
 
+import { addStateActions } from "./actions";
+
 import { NAMESPACE_DELIMITER } from "./constants";
 
 import { isValid } from "./validation";
@@ -62,7 +64,7 @@ async function addState(
   return createStore(namespace());
 }
 
-function setupValue(
+export function setupValue(
   key: string,
   namespace: INamespace,
   value: unknown,
@@ -153,7 +155,7 @@ function updateDependencies(
 
     if (
       !isEveryDependencyReady(
-        dependencies,
+        dependencies!,
         namespace,
         Object.keys(changes),
         Object.keys(realChanges),
@@ -166,7 +168,7 @@ function updateDependencies(
     const prevValue = STATE[name].value;
     const newValue = (STATE[name].computeFn as IComputeFunction)?.apply(
       null,
-      getArguments(dependencies, namespace),
+      getArguments(dependencies!, namespace),
     );
 
     if (prevValue !== newValue) {
@@ -192,7 +194,7 @@ function isEveryDependencyReady(
   });
 }
 
-function getState(namespace: INamespace, arg: string) {
+export function getState(namespace: INamespace, arg: string) {
   if (isString(arg)) {
     return createStore(arg);
   }
@@ -200,7 +202,7 @@ function getState(namespace: INamespace, arg: string) {
   return recreateStructure(getValues(namespace));
 }
 
-async function setState(
+export async function setState(
   namespace: INamespace,
   changes: Record<string, unknown>,
 ): Promise<unknown> {
@@ -208,17 +210,17 @@ async function setState(
 
   forEach(changes, (k, v) => {
     const fullKey = namespace(k);
-    const { storageType, computeFn } = STATE[fullKey];
+    const { storageType, computeFn, isAction } = STATE[fullKey];
 
-    if (computeFn) {
+    if (computeFn || isAction) {
       return;
     }
 
-    if (!storageChanges[storageType]) {
-      storageChanges[storageType] = {};
+    if (!storageChanges[storageType!]) {
+      storageChanges[storageType!] = {};
     }
 
-    storageChanges[storageType][fullKey] = v;
+    storageChanges[storageType!][fullKey] = v;
   });
 
   for (let [storageType, changes] of Object.entries(storageChanges)) {
@@ -244,7 +246,7 @@ async function setValues(
   );
 }
 
-async function resetState(namespace: INamespace, keys?: string[]) {
+export async function resetState(namespace: INamespace, keys?: string[]) {
   const namespaceState = getNamespaceState(namespace);
 
   await setState(
@@ -303,6 +305,7 @@ export function createStore(_namespace: string) {
       addStateListener(namespace, keys, cb),
     removeListener: (keys: string[], cb: () => {}) =>
       removeStateListener(namespace, keys, cb),
+    actions: (actions: IStateActions) => addStateActions(namespace, actions),
     setStorageUtils,
     onStateChange,
   });

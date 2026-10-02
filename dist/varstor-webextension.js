@@ -11,6 +11,39 @@
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/actions.ts"
+/*!************************!*\
+  !*** ./src/actions.ts ***!
+  \************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addStateActions: () => (/* binding */ addStateActions)
+/* harmony export */ });
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! . */ "./src/index.ts");
+
+function addStateActions(namespace, actions) {
+    const stateAcessor = {
+        get: ___WEBPACK_IMPORTED_MODULE_0__.getState.bind(null, namespace),
+        set: ___WEBPACK_IMPORTED_MODULE_0__.setState.bind(null, namespace),
+        reset: ___WEBPACK_IMPORTED_MODULE_0__.resetState.bind(null, namespace),
+    };
+    for (let [actionName, actionFn] of Object.entries(actions)) {
+        ___WEBPACK_IMPORTED_MODULE_0__.STATE[namespace(actionName)] = {
+            key: actionName,
+            namespace,
+            value: actionFn.bind(null, stateAcessor),
+            isAction: true,
+            listeners: [],
+        };
+    }
+}
+
+
+/***/ },
+
 /***/ "./src/constants.ts"
 /*!**************************!*\
   !*** ./src/constants.ts ***!
@@ -118,13 +151,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   STATE: () => (/* binding */ STATE),
 /* harmony export */   createStore: () => (/* binding */ createStore),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
-/* harmony export */   getValues: () => (/* binding */ getValues)
+/* harmony export */   getState: () => (/* binding */ getState),
+/* harmony export */   getValues: () => (/* binding */ getValues),
+/* harmony export */   resetState: () => (/* binding */ resetState),
+/* harmony export */   setState: () => (/* binding */ setState),
+/* harmony export */   setupValue: () => (/* binding */ setupValue)
 /* harmony export */ });
 /* harmony import */ var _storage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./storage */ "./src/storage.ts");
 /* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./src/helpers.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-/* harmony import */ var _validation__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./validation */ "./src/validation.ts");
-/* harmony import */ var _listeners__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./listeners */ "./src/listeners.ts");
+/* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./actions */ "./src/actions.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+/* harmony import */ var _validation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./validation */ "./src/validation.ts");
+/* harmony import */ var _listeners__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./listeners */ "./src/listeners.ts");
+
 
 
 
@@ -140,12 +179,12 @@ async function addState(namespace, initialState, isPersistent) {
     if (STORAGE.IS_AVAILABE(storageType)) {
         await STORAGE.UPDATE_STATE(values, storageType);
     }
-    if (!_listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()]) {
-        _listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()] = [];
+    if (!_listeners__WEBPACK_IMPORTED_MODULE_5__.LISTENERS[namespace()]) {
+        _listeners__WEBPACK_IMPORTED_MODULE_5__.LISTENERS[namespace()] = [];
     }
     for (const key in initialState) {
         const fullKey = namespace(key);
-        _validation__WEBPACK_IMPORTED_MODULE_3__.isValid.Defining(fullKey);
+        _validation__WEBPACK_IMPORTED_MODULE_4__.isValid.Defining(fullKey);
         STATE[fullKey] = setupValue(key, namespace, values[fullKey], defaultValues[key], storageType);
     }
     return createStore(namespace());
@@ -210,7 +249,7 @@ async function onStateChange(changes) {
         }
         updateDependencies(key, changes, realChanges);
     }
-    await (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.runStateChangeListeners)((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(realChanges, (k, v) => !v.isSame));
+    await (0,_listeners__WEBPACK_IMPORTED_MODULE_5__.runStateChangeListeners)((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(realChanges, (k, v) => !v.isSame));
 }
 function updateDependencies(key, changes, realChanges) {
     STATE[key].dependants?.forEach((name) => {
@@ -245,8 +284,8 @@ async function setState(namespace, changes) {
     const storageChanges = {};
     (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.forEach)(changes, (k, v) => {
         const fullKey = namespace(k);
-        const { storageType, computeFn } = STATE[fullKey];
-        if (computeFn) {
+        const { storageType, computeFn, isAction } = STATE[fullKey];
+        if (computeFn || isAction) {
             return;
         }
         if (!storageChanges[storageType]) {
@@ -280,7 +319,7 @@ function main(namespace) {
         return getState.apply(null, arguments);
     }
     if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isArray)(arguments[1])) {
-        return _listeners__WEBPACK_IMPORTED_MODULE_4__.addStateListener.apply(null, arguments);
+        return _listeners__WEBPACK_IMPORTED_MODULE_5__.addStateListener.apply(null, arguments);
     }
     if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isObject)(arguments[1])) {
         return setState.apply(null, arguments);
@@ -290,7 +329,7 @@ function setStorageUtils(storageUtils) {
     Object.assign(STORAGE, storageUtils);
 }
 function addNamespace(namespace, str) {
-    return `${namespace}${((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isString)(str) && _constants__WEBPACK_IMPORTED_MODULE_2__.NAMESPACE_DELIMITER) || ""}${str || ""}`;
+    return `${namespace}${((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isString)(str) && _constants__WEBPACK_IMPORTED_MODULE_3__.NAMESPACE_DELIMITER) || ""}${str || ""}`;
 }
 function createStore(_namespace) {
     const namespace = ((key) => addNamespace(_namespace, key));
@@ -300,8 +339,9 @@ function createStore(_namespace) {
         get: (newNamespace) => getState(namespace, newNamespace),
         set: async (changes) => await setState(namespace, changes),
         reset: (keys) => resetState(namespace, keys),
-        onChange: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.addStateListener)(namespace, keys, cb),
-        removeListener: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.removeStateListener)(namespace, keys, cb),
+        onChange: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_5__.addStateListener)(namespace, keys, cb),
+        removeListener: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_5__.removeStateListener)(namespace, keys, cb),
+        actions: (actions) => (0,_actions__WEBPACK_IMPORTED_MODULE_2__.addStateActions)(namespace, actions),
         setStorageUtils,
         onStateChange,
     });

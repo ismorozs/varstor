@@ -7,9 +7,10 @@ type IValue = {
   fullKey?: string;
   value?: any;
   computeFn?: boolean | IComputeFunction;
-  dependencies: string[];
-  dependants: string[];
-  storageType: string;
+  isAction?: boolean;
+  dependencies?: string[];
+  dependants?: string[];
+  storageType?: string;
   listeners?: any[];
   defaultValue?: any;
   namespace: INamespace;
@@ -37,3 +38,7 @@ type IStateListener = (
 ) => {};
 
 type IStateListeners = Record<string, IStateListener[]>;
+
+type IStateAction = (mutator: IStateMutator, args: any[]) => void;
+
+type IStateActions = Record<string, IStateAction>;

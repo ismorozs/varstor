@@ -25,8 +25,9 @@ in your script file.
 [1.3 Accessing ```.get()```](#accessing)  
 [1.4 Mutating ```.set()```/```.reset()```](#mutating)  
 [1.5 Listening ```.onChange()```/```.removeListener()```](#listening)  
-[1.6 Namespacing ```.get(Namespace)```](#namespacing)  
-[1.7 Method chaining](#chaining)  
+[1.6 Data encapsulation ```.actions()```](#actions)  
+[1.7 Namespacing ```.get(Namespace)```](#namespacing)  
+[1.8 Method chaining](#chaining)  
 2. [Shortcuts](#shortcuts)  
 3. [Example](#example)  
 
@@ -40,6 +41,7 @@ The library object features the following methods:
 .reset ()
 .onChange ()
 .removeListener ()
+.actions ()
 ```
 
 ## Creation ```.add()```/```.addPersistent()``` <a name="creation"></a>
@@ -128,6 +130,31 @@ Varstor.removeListener(
 ) => Varstor
 ```
 the same parameter usage. 
+
+
+
+## Data encapsulation ```.actions()``` <a name="actions"></a>
+Hide away all public data access and mutation into dedicated functions with the help of ```IStateAction```s.  
+```js
+Varstor.actions({
+  KeysActions {
+    key1: IStateAction1 (Varstor, ...arguments[]) => void
+    key2: IStateAction2 (Varstor, ...arguments[]) => void
+    ...
+  }
+})
+```
+```IStateAction``` function type binds ```Varstor``` instance as the first argument, followed by all other ```arguments``` provided by the user at the time of the call.  
+These actions reside in the same scope as regular variables. So you can access them by the ```key```s defined in ```KeysActions``` object through the ```.get()``` method.
+```js
+Varstor.add({ x: 1 });
+
+Varstor.actions({
+  changeX: (varstor, newX) => varstor.set({ x: newX }), 
+}),
+
+Varstor.get().changeX(10);
+```
   
 ## Namespacing ```.get(Namespace)``` <a name="namespacing"></a>
 To avoid name collisions, put keys with the same name in different namespaces. You can create a new or get an existing namespace with
@@ -156,7 +183,7 @@ function onChange(changes, values, data) {
   console.log("onChange", changes, values, data);
 }
 
-Varstor.add({
+await Varstor.add({
   a: 10,
   b: 20,
   c: (a, b) => a + b,
@@ -185,12 +212,29 @@ Varstor.removeListener(onChange);
 
 const newNamespace = Varstor("new namespace");
 
-newNamespace.add({
-  yyy: 1,
-  zzz: 2,
+await newNamespace.add({
+  x: 1,
+  y: 2,
+  z: 3,
 });
 
-newNamespace({ zzz: 3 });
+newNamespace.actions({
+  logValues: ({ get }) => {
+    const { x, y, z } = get();
+    console.log(`x: ${x}, y: ${y}, z: ${z}`);
+  },
+  multiplyX: ({ get, set }, num) => set({ x: get().x * num }),
+  incrementY: ({ get, set }) => set({ y: get().y + 1 }),
+})
 
-console.log(Varstor("new namespace").get()); // {yyy: 1, zzz: 3}
+const { logValues, multiplyX, incrementY } = newNamespace.get();
+
+logValues(); // x: 1, y: 2, z: 3
+multiplyX(10)
+incrementY();
+logValues(); // x: 10, y: 3, z: 3
+
+await newNamespace({ z: 110 });
+
+console.log(Varstor("new namespace").get()); // {x: 10, y: 3, z: 110, logValues: ƒ, multiplyX: ƒ, …}
 ```
