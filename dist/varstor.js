@@ -25,16 +25,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! . */ "./src/index.ts");
 
 function addStateActions(namespace, actions) {
-    const stateAcessor = {
-        get: ___WEBPACK_IMPORTED_MODULE_0__.getState.bind(null, namespace),
-        set: ___WEBPACK_IMPORTED_MODULE_0__.setState.bind(null, namespace),
-        reset: ___WEBPACK_IMPORTED_MODULE_0__.resetState.bind(null, namespace),
-    };
-    for (let [actionName, actionFn] of Object.entries(actions)) {
+    for (const [actionName, actionFn] of Object.entries(actions)) {
         ___WEBPACK_IMPORTED_MODULE_0__.STATE[namespace(actionName)] = {
             key: actionName,
             namespace,
-            value: actionFn.bind(null, stateAcessor),
+            value: actionFn.bind(null, (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace())),
             isAction: true,
             listeners: [],
         };
@@ -154,6 +149,7 @@ function uid() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   STATE: () => (/* binding */ STATE),
+/* harmony export */   createPendingChanges: () => (/* binding */ createPendingChanges),
 /* harmony export */   createStore: () => (/* binding */ createStore),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   getState: () => (/* binding */ getState),
@@ -174,7 +170,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const STATE = {};
-const WAITING_CHANGES = {};
+const STATE_CHANGED_PIECES = {};
+const STATE_PENDING_CHANGES = {};
 const STORAGE = {};
 setStorageUtils(_storage__WEBPACK_IMPORTED_MODULE_0__["default"]);
 async function addState(namespace, initialState, isPersistent) {
@@ -183,9 +180,6 @@ async function addState(namespace, initialState, isPersistent) {
     const values = (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(initialState, (k, v) => [namespace(k), v]);
     if (STORAGE.IS_AVAILABE(storageType)) {
         await STORAGE.UPDATE_STATE(values, storageType);
-    }
-    if (!_listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()]) {
-        _listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()] = [];
     }
     for (const key in initialState) {
         const fullKey = namespace(key);
@@ -240,7 +234,7 @@ function getArguments(dependencies, namespace) {
     return dependencies.map((name) => values[name]);
 }
 async function joinStateChanges(changesPiece) {
-    for (const [updateId, { storageTypes, readyStorageTypes, changes },] of Object.entries(WAITING_CHANGES)) {
+    for (const [updateId, { storageTypes, readyStorageTypes, changes },] of Object.entries(STATE_CHANGED_PIECES)) {
         if (changesPiece[updateId]) {
             const storageType = changesPiece[updateId].newValue;
             readyStorageTypes[storageType] = true;
@@ -254,7 +248,7 @@ async function joinStateChanges(changesPiece) {
                     return;
                 }
             }
-            delete WAITING_CHANGES[updateId];
+            delete STATE_CHANGED_PIECES[updateId];
             await onStateChange(changes);
         }
     }
@@ -320,7 +314,7 @@ async function setState(namespace, changes) {
         storageTypes[storageType] = true;
         storageChanges[storageType][fullKey] = v;
     });
-    WAITING_CHANGES[updateId] = {
+    STATE_CHANGED_PIECES[updateId] = {
         storageTypes,
         readyStorageTypes: {},
         changes: {},
@@ -340,17 +334,34 @@ async function setValues(storageType, changes) {
     joinStateChanges((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(changes, (k, newValue) => [k, { newValue }]));
 }
 async function resetState(namespace, keys) {
-    const namespaceState = getNamespaceState(namespace);
-    await setState(namespace, (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(keys
-        ? (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(namespaceState, (k, { key }) => keys.includes(key))
-        : namespaceState, (k, { key, defaultValue }) => [key, defaultValue]));
+    await setState(namespace, getDefaultValues(namespace, keys));
     return createStore(namespace());
+}
+function getDefaultValues(namespace, keys) {
+    const namespaceState = getNamespaceState(namespace);
+    return (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(keys
+        ? (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(namespaceState, (k, { key }) => keys.includes(key))
+        : namespaceState, (k, { key, defaultValue }) => [key, defaultValue]);
+}
+function createPendingChanges(namespace) {
+    const flush = () => {
+        const changes = STATE_PENDING_CHANGES[namespace()];
+        STATE_PENDING_CHANGES[namespace()] = {};
+        return changes;
+    };
+    return {
+        add: (changes) => Object.assign(STATE_PENDING_CHANGES[namespace()], changes),
+        reset: (keys) => Object.assign(STATE_PENDING_CHANGES[namespace()], getDefaultValues(namespace, keys)),
+        get: () => STATE_PENDING_CHANGES[namespace()],
+        flush,
+        commit: () => setState(namespace, flush()),
+    };
 }
 function main(namespace) {
     if (!arguments[1] || (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isString)(arguments[1])) {
         return getState.apply(null, arguments);
     }
-    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isArray)(arguments[1])) {
+    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isArray)(arguments[1]) || (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isFunction)(arguments[1]) || (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isAsyncFunction)(arguments[1])) {
         return _listeners__WEBPACK_IMPORTED_MODULE_4__.addStateListener.apply(null, arguments);
     }
     if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isObject)(arguments[1])) {
@@ -365,12 +376,19 @@ function addNamespace(namespace, str) {
 }
 function createStore(_namespace) {
     const namespace = ((key) => addNamespace(_namespace, key));
+    if (!STATE_PENDING_CHANGES[namespace()]) {
+        STATE_PENDING_CHANGES[namespace()] = {};
+    }
+    if (!_listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()]) {
+        _listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()] = [];
+    }
     return Object.assign(main.bind(null, namespace), {
         add: (state) => addState(namespace, state, false),
         addPersistent: (state) => addState(namespace, state, true),
         get: (newNamespace) => getState(namespace, newNamespace),
         set: async (changes) => await setState(namespace, changes),
         reset: (keys) => resetState(namespace, keys),
+        changes: createPendingChanges(namespace),
         onChange: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.addStateListener)(namespace, keys, cb),
         removeListener: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.removeStateListener)(namespace, keys, cb),
         actions: (actions) => (0,_actions__WEBPACK_IMPORTED_MODULE_2__.addStateActions)(namespace, actions),
@@ -407,11 +425,10 @@ const LISTENERS = {};
 async function runStateChangeListeners(realChanges) {
     if (Object.keys(realChanges).length) {
         const { namespace } = ___WEBPACK_IMPORTED_MODULE_0__.STATE[Object.keys(realChanges)[0]];
-        const stateValues = (0,___WEBPACK_IMPORTED_MODULE_0__.getValues)(namespace);
-        for (let [changeKey, change] of Object.entries(realChanges)) {
+        for (const [changeKey] of Object.entries(realChanges)) {
             const { listeners, key } = ___WEBPACK_IMPORTED_MODULE_0__.STATE[changeKey];
             for (const cb of listeners) {
-                const fn = cb.bind(null, [key], stateValues, change);
+                const fn = cb.bind(null, [key], (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace()));
                 if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(cb)) {
                     await fn();
                 }
@@ -423,10 +440,7 @@ async function runStateChangeListeners(realChanges) {
         const namespaceLength = `${namespace()}${_constants__WEBPACK_IMPORTED_MODULE_1__.NAMESPACE_DELIMITER}`.length;
         const readableKeys = (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(realChanges, (k) => k.slice(namespaceLength));
         for (const cb of LISTENERS[namespace()]) {
-            const fn = cb.bind(null, readableKeys, stateValues, (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(realChanges, (k, v) => [
-                k.slice(namespaceLength),
-                v,
-            ]));
+            const fn = cb.bind(null, readableKeys, (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace()));
             if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(cb)) {
                 await fn();
             }

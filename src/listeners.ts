@@ -1,4 +1,4 @@
-import { STATE, getValues, createStore } from ".";
+import { STATE, createStore } from ".";
 import { NAMESPACE_DELIMITER } from "./constants";
 import { map, isFunction, isAsyncFunction } from "./helpers";
 
@@ -8,12 +8,10 @@ export async function runStateChangeListeners(realChanges: IStateChanges) {
   if (Object.keys(realChanges).length) {
     const { namespace } =
       STATE[Object.keys(realChanges)[0] as keyof typeof STATE];
-    const stateValues = getValues(namespace);
-
-    for (let [changeKey, change] of Object.entries(realChanges)) {
+    for (const [changeKey] of Object.entries(realChanges)) {
       const { listeners, key } = STATE[changeKey];
       for (const cb of listeners!) {
-        const fn = cb.bind(null, [key], stateValues, change);
+        const fn = cb.bind(null, [key], createStore(namespace()));
         if (isAsyncFunction(cb)) {
           await fn();
         } else {
@@ -31,11 +29,7 @@ export async function runStateChangeListeners(realChanges: IStateChanges) {
       const fn = cb.bind(
         null,
         readableKeys,
-        stateValues,
-        map(realChanges, (k, v) => [
-          k.slice(namespaceLength),
-          v,
-        ]) as IStateChanges,
+        createStore(namespace())
       );
       if (isAsyncFunction(cb)) {
         await fn();

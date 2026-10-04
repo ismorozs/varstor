@@ -23,7 +23,7 @@ in your script file.
 [1.1 Creation ```.add()```/```.addPersistent()```](#creation)  
 [1.2 Dynamic reevaluation (```ReactiveFunction```)](#reactivefunction)  
 [1.3 Accessing ```.get()```](#accessing)  
-[1.4 Mutating ```.set()```/```.reset()```](#mutating)  
+[1.4 Mutating ```.set()```/```.reset()```/```.changes.*()```](#mutating)  
 [1.5 Listening ```.onChange()```/```.removeListener()```](#listening)  
 [1.6 Data encapsulation ```.actions()```](#actions)  
 [1.7 Namespacing ```.get(Namespace)```](#namespacing)  
@@ -32,16 +32,18 @@ in your script file.
 3. [Example](#example)  
 
 ## Usage <a name="overview"></a>
-The library object features the following methods:
+The library object features the following methods and properties:
 ```js
 .add ()
 .addPersistent ()
 .get ()
 .set ()
 .reset ()
+.changes {}
 .onChange ()
 .removeListener ()
 .actions ()
+.namespace () // just returns the string value of the current namespace
 ```
 
 ## Creation ```.add()```/```.addPersistent()``` <a name="creation"></a>
@@ -92,7 +94,7 @@ Where:
 
   
   
-## Mutating ```.set()```/```.reset()``` <a name="mutating"></a>
+## Mutating ```.set()```/```.reset()```/```.changes.*()``` <a name="mutating"></a>
 Values are mutated with:
 ```js
 async Varstor.set(
@@ -102,13 +104,22 @@ async Varstor.set(
   }
 ) => Varstor
 ```
-
+\
 To reset values back to defaults:
 ```js
 async Varstor.reset(Keys []) => Varstor
 ```
 Where:  
 ```Keys[]``` (optional) - array of keys to return to default values. If omitted all values will be returned to defaults.  
+\
+For more control over the timing of state changes in the namespace, use ```.changes {}``` methods collection.
+```js
+Varstor.changes.add(KeysValues {}) // => adds pending changes in the current namespace
+Varstor.changes.reset(Keys []) // => adds pending changes that will reset some of the keys
+Varstor.changes.get() // => gets pending changes in the current namespace
+Varstor.changes.flush() // => returns and then empties the pending changes object
+Varstor.changes.commit() // => actually commits all accumulated pending changes in the namespace
+```
 
 > [!WARNING]
 > Values are mutated asynchronously; don't assume the script will recognize the change immediately on the next line. Instead, ```await``` or make use of ```onChange``` listeners! 
@@ -120,18 +131,21 @@ To listen and react to state changes:
 ```js
 Varstor.onChange(
   Keys[],
-  ChangeCallback(ChangedKeys [], allValues {}, PreviousValues {}) => void
+  ChangeCallback(ChangedKeys [], Varstor) => void
 ) => Varstor
 ```
 Where:  
 ```Keys[]``` (optional) - array of keys of the state in the current namespace that you want to listen to. If omitted, ```ChangeCallback``` will run on any value change in the namespace.  
-```ChangeCallback``` - function to run when a change happens
+  
 
+```ChangeCallback``` - a function to run when the change happens. Takes ```ChangedKeys[]``` array of keys that have been changed as the first argument, and a ```Varstor``` instance as the second.
+\
+\
 To remove the listener:
 ```js
 Varstor.removeListener(
   Keys[],
-  ChangeCallback(ChangedKeys [], allValues {}, PreviousValues {}) => void
+  ChangeCallback(ChangedKeys [], Varstor) => void
 ) => Varstor
 ```
 the same parameter usage. 
@@ -170,7 +184,7 @@ which will return a new instance of ```Varstor``` with the specified ```Namespac
   
 
 ## Method chaining <a name="chaining"></a>
-Methods ```.add```, ```.addPersistent```, ```.set()```, ```.reset()```, ```onChange```, and ```removeListener``` all return a new instance of ```Varstor``` with the same namespace, so method chaining is possible.  
+Methods ```.add```, ```.addPersistent```, ```.set()```, ```.reset()```, ```.onChange()```, and ```.removeListener()``` all return a new instance of ```Varstor``` with the same namespace, so method chaining is possible.  
 
 
 ## Shortcuts <a name="shortcuts"></a>
@@ -179,13 +193,14 @@ The library/namespace object itself can be called with different types of argume
 Varstor() -> Varstor.get()
 Varstor(String namespace) -> Varstor.get(namespace)
 Varstor({ key: value }) -> Varstor.set({ key: value })
-Varstor([], () => {}) -> Varstor.onChange([], () => {})
+Varstor([], () => {}) -> Varstor.onChange([], () => {}) 
+Varstor(() => {}) -> Varstor.onChange(() => {}) 
 ```
 
 ## Example <a name="example"></a>
 ```js
-function onChange(changes, values, data) {
-  console.log("onChange", changes, values, data);
+function onChange(changes, store) {
+  console.log("onChange", store.get());
 }
 
 await Varstor.add({
@@ -242,4 +257,21 @@ logValues(); // x: 10, y: 3, z: 3
 await newNamespace({ z: 110 });
 
 console.log(Varstor("new namespace").get()); // {x: 10, y: 3, z: 110, logValues: ƒ, multiplyX: ƒ, …}
+
+const thirdNamespace = Varstor("third namespace");
+
+thirdNamespace.add({
+  phrase: "Hello",
+  to: "world",
+});
+
+thirdNamespace.changes.add({ phrase: "Greetings" });
+thirdNamespace.changes.add({ to: "you" });
+
+console.log(thirdNamespace.get()) // {phrase: 'Hello', to: 'world'}
+
+thirdNamespace.changes.commit();
+
+console.log(thirdNamespace.get()) // {phrase: 'Greetings', to: 'you'}
+
 ```

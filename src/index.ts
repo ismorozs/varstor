@@ -11,6 +11,7 @@ import {
   recreateStructure,
   forEach,
   uid,
+  isAsyncFunction,
 } from "./helpers";
 
 import { addStateActions } from "./actions";
@@ -25,7 +26,8 @@ import {
 } from "./listeners";
 
 export const STATE = {} as IState;
-const WAITING_CHANGES = {} as IStateUpdatePieces;
+const STATE_CHANGED_PIECES = {} as IStateUpdatePieces;
+const STATE_PENDING_CHANGES = {} as IStatePendingChanges;
 const STORAGE = {} as IStorageFunctions;
 
 setStorageUtils(storageUtils);
@@ -44,10 +46,6 @@ async function addState(
 
   if (STORAGE.IS_AVAILABE(storageType as string)) {
     await STORAGE.UPDATE_STATE(values, storageType as string);
-  }
-
-  if (!LISTENERS[namespace()]) {
-    LISTENERS[namespace()] = [];
   }
 
   for (const key in initialState) {
@@ -129,7 +127,7 @@ export async function joinStateChanges(changesPiece: IStateChanges) {
   for (const [
     updateId,
     { storageTypes, readyStorageTypes, changes },
-  ] of Object.entries(WAITING_CHANGES)) {
+  ] of Object.entries(STATE_CHANGED_PIECES)) {
     if (changesPiece[updateId]) {
       const storageType = changesPiece[updateId].newValue;
       readyStorageTypes[storageType] = true;
@@ -145,7 +143,7 @@ export async function joinStateChanges(changesPiece: IStateChanges) {
         }
       }
 
-      delete WAITING_CHANGES[updateId];
+      delete STATE_CHANGED_PIECES[updateId];
 
       await onStateChange(changes);
     }
@@ -254,7 +252,7 @@ export async function setState(
     storageChanges[storageType!][fullKey] = v;
   });
 
-  WAITING_CHANGES[updateId] = {
+  STATE_CHANGED_PIECES[updateId] = {
     storageTypes,
     readyStorageTypes: {},
     changes: {},
@@ -284,19 +282,41 @@ async function setValues(
 }
 
 export async function resetState(namespace: INamespace, keys?: string[]) {
-  const namespaceState = getNamespaceState(namespace);
-
-  await setState(
-    namespace,
-    map(
-      keys
-        ? filter(namespaceState, (k, { key }) => keys.includes(key!))
-        : namespaceState,
-      (k, { key, defaultValue }) => [key, defaultValue],
-    ) as Record<string, any>,
-  );
+  await setState(namespace, getDefaultValues(namespace, keys));
 
   return createStore(namespace());
+}
+
+function getDefaultValues(namespace: INamespace, keys?: string[]) {
+  const namespaceState = getNamespaceState(namespace);
+
+  return map(
+    keys
+      ? filter(namespaceState, (k, { key }) => keys.includes(key!))
+      : namespaceState,
+    (k, { key, defaultValue }) => [key, defaultValue],
+  ) as Record<string, any>;
+}
+
+export function createPendingChanges(namespace: INamespace) {
+  const flush = () => {
+    const changes = STATE_PENDING_CHANGES[namespace()];
+    STATE_PENDING_CHANGES[namespace()] = {};
+    return changes;
+  }
+
+  return {
+    add: (changes: Record<string, any>) =>
+      Object.assign(STATE_PENDING_CHANGES[namespace()], changes),
+    reset: (keys: string[]) =>
+      Object.assign(
+        STATE_PENDING_CHANGES[namespace()],
+        getDefaultValues(namespace, keys),
+      ),
+    get: () => STATE_PENDING_CHANGES[namespace()],
+    flush,
+    commit: () => setState(namespace, flush()),
+  };
 }
 
 function main(namespace: INamespace): any {
@@ -304,7 +324,7 @@ function main(namespace: INamespace): any {
     return getState.apply(null, arguments as unknown as [INamespace, string]);
   }
 
-  if (isArray(arguments[1])) {
+  if (isArray(arguments[1]) || isFunction(arguments[1]) || isAsyncFunction(arguments[1])) {
     return addStateListener.apply(
       null,
       arguments as unknown as [INamespace, string[], () => {}],
@@ -331,6 +351,14 @@ export function createStore(_namespace: string) {
   const namespace = ((key: string) =>
     addNamespace(_namespace, key)) as INamespace;
 
+  if (!STATE_PENDING_CHANGES[namespace()]) {
+    STATE_PENDING_CHANGES[namespace()] = {};
+  }
+
+  if (!LISTENERS[namespace()]) {
+    LISTENERS[namespace()] = [];
+  }
+
   return Object.assign(main.bind(null, namespace), {
     add: (state: IStateDefault) => addState(namespace, state, false),
     addPersistent: (state: IStateDefault) => addState(namespace, state, true),
@@ -338,6 +366,7 @@ export function createStore(_namespace: string) {
     set: async (changes: Record<string, unknown>) =>
       await setState(namespace, changes),
     reset: (keys: string[]) => resetState(namespace, keys),
+    changes: createPendingChanges(namespace),
     onChange: (keys: string[], cb: () => {}) =>
       addStateListener(namespace, keys, cb),
     removeListener: (keys: string[], cb: () => {}) =>

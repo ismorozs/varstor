@@ -34,8 +34,7 @@ type IStorageFunctions = {
 
 type IStateListener = (
   changes: string[],
-  values: Record<string, any>,
-  data: IStateChanges,
+  store: Record<string, any>,
 ) => any;
 
 type IStateListeners = Record<string, IStateListener[]>;
@@ -49,3 +48,5 @@ type IStateUpdatePieces = Record<string, {
   readyStorageTypes: Record<string, boolean>;
   changes: IStateChanges;
 }>;
+
+type IStatePendingChanges = Record<string, Record<string, any>>;
