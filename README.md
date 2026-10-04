@@ -45,7 +45,7 @@ The library object features the following methods:
 ```
 
 ## Creation ```.add()```/```.addPersistent()``` <a name="creation"></a>
-Values are added to the store with add or addPersistent methods. They perform the same functionality, except addPersistent saves state to the storage and lets you reuse it between browser sessions.
+Values are added to the store with ```add``` or ```addPersistent``` methods. They perform the same functionality, except ```addPersistent``` saves state to the storage and lets you reuse it between browser sessions.
 
 ```js
 async Varstor.add(
@@ -61,7 +61,10 @@ Where:
 ```KeysValues {}``` - a standard object with keys and values, where ```key``` is a name of piece of state, and ```value``` is a default value or ```ReactiveFunction```  
 ```ReactiveFunction``` - re-evalutes and updates its value automatically each time arguments in ```valueNames``` list change. ```valueNames``` are any state values defined before the ```ReactiveFunction```. ```computedValue```s are not saved in storage.   
 
-**Important: ```add``` and ```addPersistent``` are asynchronous operations; you must `await` or use ```Promise.then``` to ensure all the data is ready to work with!**  
+> [!WARNING]
+> ```add``` and ```addPersistent``` are asynchronous operations; you must `await` or use ```Promise.then``` to ensure all the data is ready to work with!  
+
+
   
 ## Dynamic reevaluation (```ReactiveFunction```) <a name="reactivefunction"></a>
 Values can change automatically with the help of ```ReactiveFunction```s when one or more of the other values in the namespace change.  
@@ -99,7 +102,6 @@ async Varstor.set(
   }
 ) => Varstor
 ```
-**Important: values are updated asynchronously; don't assume the script will recognize the change immediately on the next line. Instead, ```await``` or make use of ```onChange``` listeners!**  
 
 To reset values back to defaults:
 ```js
@@ -107,6 +109,9 @@ async Varstor.reset(Keys []) => Varstor
 ```
 Where:  
 ```Keys[]``` (optional) - array of keys to return to default values. If omitted all values will be returned to defaults.  
+
+> [!WARNING]
+> Values are mutated asynchronously; don't assume the script will recognize the change immediately on the next line. Instead, ```await``` or make use of ```onChange``` listeners! 
 
 
 ## Listening ```.onChange()```/```.removeListener()``` <a name="listening"></a>
@@ -134,17 +139,17 @@ the same parameter usage.
 
 
 ## Data encapsulation ```.actions()``` <a name="actions"></a>
-Hide away all public data access and mutation into dedicated functions with the help of ```IStateAction```s.  
+Hide away all public data access and mutation into dedicated functions with the help of ```StateAction```s.  
 ```js
 Varstor.actions({
   KeysActions {
-    key1: IStateAction1 (Varstor, ...arguments[]) => void
-    key2: IStateAction2 (Varstor, ...arguments[]) => void
+    key1: StateAction1 (Varstor, ...arguments[]) => void
+    key2: StateAction2 (Varstor, ...arguments[]) => void
     ...
   }
 })
 ```
-```IStateAction``` function type binds ```Varstor``` instance as the first argument, followed by all other ```arguments``` provided by the user at the time of the call.  
+```StateAction``` function type binds ```Varstor``` instance as the first argument, followed by all other ```arguments``` provided by the user at the time of the call.  
 These actions reside in the same scope as regular variables. So you can access them by the ```key```s defined in ```KeysActions``` object through the ```.get()``` method.
 ```js
 Varstor.add({ x: 1 });

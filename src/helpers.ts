@@ -13,6 +13,10 @@ export function isFunction(obj: unknown) {
   return getObjectType(obj) === "[object Function]";
 }
 
+export function isAsyncFunction (obj: unknown) {
+  return getObjectType(obj) === "[object AsyncFunction]";
+}
+
 export function isObject(obj: unknown) {
   return getObjectType(obj) === "[object Object]";
 }
@@ -85,4 +89,8 @@ export function recreateStructure(value: unknown) {
   }
 
   return newValue;
+}
+
+export function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }

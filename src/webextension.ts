@@ -6,12 +6,12 @@ import webextensionStorageUtils, {
   isSessionStorageSupport,
 } from "./webextension-storage";
 
-const { onStateChange, setStorageUtils } = main;
+const { joinStateChanges, setStorageUtils } = main;
 
 if (isBackgroundScript()) {
-  browser.storage.local.onChanged.addListener(onStateChange);
+  browser.storage.local.onChanged.addListener(joinStateChanges);
   isSessionStorageSupport() &&
-    browser.storage.session.onChanged.addListener(onStateChange);
+    browser.storage.session.onChanged.addListener(joinStateChanges);
 }
 
 setStorageUtils(webextensionStorageUtils);

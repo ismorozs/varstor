@@ -29,16 +29,23 @@ type IStorageFunctions = {
   IS_AVAILABE: (type: string) => boolean;
   UPDATE_STATE: (state: IStateDefault, type: string) => IStateDefault;
   SET_VALUES: (type: string, changes: Record<string, any>) => Promise<boolean>;
+  REMOVE_KEY: (type: string, key: string) => void;
 };
 
 type IStateListener = (
   changes: string[],
   values: Record<string, any>,
   data: IStateChanges,
-) => {};
+) => any;
 
 type IStateListeners = Record<string, IStateListener[]>;
 
 type IStateAction = (mutator: IStateMutator, args: any[]) => void;
 
 type IStateActions = Record<string, IStateAction>;
+
+type IStateUpdatePieces = Record<string, {
+  storageTypes: Record<string, boolean>;
+  readyStorageTypes: Record<string, boolean>;
+  changes: IStateChanges;
+}>;

@@ -1,6 +1,6 @@
 import { STATE, getValues, createStore } from ".";
 import { NAMESPACE_DELIMITER } from "./constants";
-import { map, isFunction } from "./helpers";
+import { map, isFunction, isAsyncFunction } from "./helpers";
 
 export const LISTENERS = {} as IStateListeners;
 
@@ -13,23 +13,35 @@ export async function runStateChangeListeners(realChanges: IStateChanges) {
     for (let [changeKey, change] of Object.entries(realChanges)) {
       const { listeners, key } = STATE[changeKey];
       for (const cb of listeners!) {
-        await cb([key], stateValues, change);
+        const fn = cb.bind(null, [key], stateValues, change);
+        if (isAsyncFunction(cb)) {
+          await fn();
+        } else {
+          fn();
+        }
       }
     }
 
+    const namespaceLength = `${namespace()}${NAMESPACE_DELIMITER}`.length;
     const readableKeys = map(realChanges, (k) =>
-      k.slice(NAMESPACE_DELIMITER.length),
+      k.slice(namespaceLength),
     ) as string[];
 
     for (const cb of LISTENERS[namespace()]) {
-      await cb(
+      const fn = cb.bind(
+        null,
         readableKeys,
         stateValues,
         map(realChanges, (k, v) => [
-          k.slice(NAMESPACE_DELIMITER.length),
+          k.slice(namespaceLength),
           v,
         ]) as IStateChanges,
       );
+      if (isAsyncFunction(cb)) {
+        await fn();
+      } else {
+        fn();
+      }
     }
   }
 }
@@ -39,7 +51,7 @@ export function addStateListener(
   observables: string[] | IStateListener,
   cb: () => {},
 ) {
-  if (isFunction(observables)) {
+  if (isFunction(observables) || isAsyncFunction(observables)) {
     LISTENERS[namespace()].push(observables as IStateListener);
     return createStore(namespace());
   }
@@ -56,7 +68,7 @@ export function removeStateListener(
   observables: string[] | IStateListener,
   removeCb: () => {},
 ) {
-  if (isFunction(observables)) {
+  if (isFunction(observables) || isAsyncFunction(observables)) {
     const removeIdx = LISTENERS[namespace()].findIndex(
       (cb) => cb === observables,
     );

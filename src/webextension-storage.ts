@@ -5,6 +5,7 @@ export default {
   IS_AVAILABE: isStorageAvailable,
   UPDATE_STATE: updateStateFromStorage,
   SET_VALUES: setStorageValue,
+  REMOVE_KEY: removeStorageKey,
 };
 
 function getStorageType(isPersistent: boolean) {
@@ -25,6 +26,12 @@ async function updateStateFromStorage(state: IStateDefault, type: string) {
 async function setStorageValue(type: string, changes: Record<string, any>) {
   await browser.storage[type].set(changes);
   return true;
+}
+
+async function removeStorageKey(type: string, key: string) {
+  if (type) {
+    await browser.storage[type].remove(key);
+  }
 }
 
 export function isSessionStorageSupport() {

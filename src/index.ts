@@ -10,13 +10,13 @@ import {
   filter,
   recreateStructure,
   forEach,
+  uid,
 } from "./helpers";
 
 import { addStateActions } from "./actions";
 
 import { NAMESPACE_DELIMITER } from "./constants";
 
-import { isValid } from "./validation";
 import {
   runStateChangeListeners,
   addStateListener,
@@ -25,6 +25,7 @@ import {
 } from "./listeners";
 
 export const STATE = {} as IState;
+const WAITING_CHANGES = {} as IStateUpdatePieces;
 const STORAGE = {} as IStorageFunctions;
 
 setStorageUtils(storageUtils);
@@ -51,7 +52,6 @@ async function addState(
 
   for (const key in initialState) {
     const fullKey = namespace(key);
-    isValid.Defining(fullKey);
     STATE[fullKey] = setupValue(
       key,
       namespace,
@@ -123,6 +123,33 @@ export function getValues(namespace: INamespace) {
 function getArguments(dependencies: string[], namespace: INamespace) {
   const values = getValues(namespace);
   return dependencies.map((name) => values[name as keyof typeof values]);
+}
+
+export async function joinStateChanges(changesPiece: IStateChanges) {
+  for (const [
+    updateId,
+    { storageTypes, readyStorageTypes, changes },
+  ] of Object.entries(WAITING_CHANGES)) {
+    if (changesPiece[updateId]) {
+      const storageType = changesPiece[updateId].newValue;
+      readyStorageTypes[storageType] = true;
+      delete changesPiece[updateId];
+      Object.assign(changes, changesPiece);
+      if (STORAGE.IS_AVAILABE(storageType)) {
+        STORAGE.REMOVE_KEY(storageType, updateId);
+      }
+
+      for (const key in storageTypes) {
+        if (!readyStorageTypes[key]) {
+          return;
+        }
+      }
+
+      delete WAITING_CHANGES[updateId];
+
+      await onStateChange(changes);
+    }
+  }
 }
 
 async function onStateChange(changes: IStateChanges) {
@@ -207,6 +234,8 @@ export async function setState(
   changes: Record<string, unknown>,
 ): Promise<unknown> {
   const storageChanges: Record<string, any> = {};
+  const updateId = uid();
+  const storageTypes = {} as Record<string, boolean>;
 
   forEach(changes, (k, v) => {
     const fullKey = namespace(k);
@@ -220,11 +249,19 @@ export async function setState(
       storageChanges[storageType!] = {};
     }
 
+    storageTypes[storageType!] = true;
+
     storageChanges[storageType!][fullKey] = v;
   });
 
+  WAITING_CHANGES[updateId] = {
+    storageTypes,
+    readyStorageTypes: {},
+    changes: {},
+  };
+
   for (let [storageType, changes] of Object.entries(storageChanges)) {
-    await setValues(storageType, changes);
+    await setValues(storageType, { ...changes, [updateId]: storageType });
   }
 
   return createStore(namespace());
@@ -241,7 +278,7 @@ async function setValues(
     }
   }
 
-  onStateChange(
+  joinStateChanges(
     map(changes, (k, newValue) => [k, { newValue }]) as Record<string, any>,
   );
 }
@@ -307,7 +344,8 @@ export function createStore(_namespace: string) {
       removeStateListener(namespace, keys, cb),
     actions: (actions: IStateActions) => addStateActions(namespace, actions),
     setStorageUtils,
-    onStateChange,
+    joinStateChanges,
+    namespace,
   });
 }
 

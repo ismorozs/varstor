@@ -29,9 +29,16 @@ async function setStorageValue(
   return false;
 }
 
+function removeStorageKey (type: string, key: string) {
+  if (type) {
+    localStorage.removeItem(key);
+  }
+}
+
 export default {
   GET_TYPE: getStorageType,
   IS_AVAILABE: isStorageAvailable,
   UPDATE_STATE: updateFromLocalStorage,
   SET_VALUES: setStorageValue,
+  REMOVE_KEY: removeStorageKey,
 };
