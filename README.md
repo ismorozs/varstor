@@ -161,7 +161,7 @@ Varstor.actions({
     key2: StateAction2 (Varstor, ...arguments[]) => void
     ...
   }
-})
+}) => Varstor
 ```
 ```StateAction``` function type binds ```Varstor``` instance as the first argument, followed by all other ```arguments``` provided by the user at the time of the call.  
 These actions reside in the same scope as regular variables. So you can access them by the ```key```s defined in ```KeysActions``` object through the ```.get()``` method.
@@ -184,7 +184,7 @@ which will return a new instance of ```Varstor``` with the specified ```Namespac
   
 
 ## Method chaining <a name="chaining"></a>
-Methods ```.add```, ```.addPersistent```, ```.set()```, ```.reset()```, ```.onChange()```, and ```.removeListener()``` all return a new instance of ```Varstor``` with the same namespace, so method chaining is possible.  
+Methods ```.add```, ```.addPersistent```, ```.set()```, ```.reset()```, ```.actions()``` , ```.onChange()```, and ```.removeListener()``` all return a new instance of ```Varstor``` with the same namespace, so method chaining is possible.  
 
 
 ## Shortcuts <a name="shortcuts"></a>

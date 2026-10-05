@@ -1,5 +1,7 @@
 const browser = require("webextension-polyfill/dist/browser-polyfill.min");
 
+import { type IStateDefault } from "./types";
+
 export default {
   GET_TYPE: getStorageType,
   IS_AVAILABE: isStorageAvailable,

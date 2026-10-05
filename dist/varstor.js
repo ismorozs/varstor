@@ -9,8 +9,17 @@
 		root["Varstor"] = factory();
 })(this, () => {
 return /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
+
+/***/ "./src/types.d.ts"
+/*!************************!*\
+  !*** ./src/types.d.ts ***!
+  \************************/
+() {
+
+
+
+/***/ },
 
 /***/ "./src/actions.ts"
 /*!************************!*\
@@ -18,22 +27,27 @@ return /******/ (() => { // webpackBootstrap
   \************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   addStateActions: () => (/* binding */ addStateActions)
 /* harmony export */ });
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! . */ "./src/index.ts");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types */ "./src/types.d.ts");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_types__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! . */ "./src/index.ts");
+
 
 function addStateActions(namespace, actions) {
     for (const [actionName, actionFn] of Object.entries(actions)) {
-        ___WEBPACK_IMPORTED_MODULE_0__.STATE[namespace(actionName)] = {
+        ___WEBPACK_IMPORTED_MODULE_1__.STATE[namespace(actionName)] = {
             key: actionName,
             namespace,
-            value: actionFn.bind(null, (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace())),
+            value: actionFn.bind(null, (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace())),
             isAction: true,
             listeners: [],
         };
     }
+    return (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace());
 }
 
 
@@ -45,6 +59,7 @@ function addStateActions(namespace, actions) {
   \**************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   NAMESPACE_DELIMITER: () => (/* binding */ NAMESPACE_DELIMITER)
@@ -60,6 +75,7 @@ const NAMESPACE_DELIMITER = "::";
   \************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   filter: () => (/* binding */ filter),
@@ -146,6 +162,7 @@ function uid() {
   \**********************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   STATE: () => (/* binding */ STATE),
@@ -159,11 +176,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   setState: () => (/* binding */ setState),
 /* harmony export */   setupValue: () => (/* binding */ setupValue)
 /* harmony export */ });
-/* harmony import */ var _storage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./storage */ "./src/storage.ts");
-/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./src/helpers.ts");
-/* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./actions */ "./src/actions.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-/* harmony import */ var _listeners__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./listeners */ "./src/listeners.ts");
+/* harmony import */ var _types_d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types.d */ "./src/types.d.ts");
+/* harmony import */ var _types_d__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_types_d__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./storage */ "./src/storage.ts");
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers */ "./src/helpers.ts");
+/* harmony import */ var _actions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./actions */ "./src/actions.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+/* harmony import */ var _listeners__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./listeners */ "./src/listeners.ts");
+
 
 
 
@@ -173,11 +193,11 @@ const STATE = {};
 const STATE_CHANGED_PIECES = {};
 const STATE_PENDING_CHANGES = {};
 const STORAGE = {};
-setStorageUtils(_storage__WEBPACK_IMPORTED_MODULE_0__["default"]);
+setStorageUtils(_storage__WEBPACK_IMPORTED_MODULE_1__["default"]);
 async function addState(namespace, initialState, isPersistent) {
     const storageType = STORAGE.GET_TYPE(isPersistent);
     const defaultValues = Object.assign({}, initialState);
-    const values = (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(initialState, (k, v) => [namespace(k), v]);
+    const values = (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(initialState, (k, v) => [namespace(k), v]);
     if (STORAGE.IS_AVAILABE(storageType)) {
         await STORAGE.UPDATE_STATE(values, storageType);
     }
@@ -189,9 +209,9 @@ async function addState(namespace, initialState, isPersistent) {
 }
 function setupValue(key, namespace, value, defaultValue, storageType) {
     const fullKey = namespace(key);
-    const isComputedValue = (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isFunction)(value);
+    const isComputedValue = (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isFunction)(value);
     const dependencies = isComputedValue
-        ? (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.getParamNames)(value)
+        ? (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.getParamNames)(value)
         : [];
     dependencies.forEach((dependency) => {
         const fullDependencyKey = namespace(dependency);
@@ -221,10 +241,10 @@ function setupValue(key, namespace, value, defaultValue, storageType) {
     };
 }
 function getNamespaceState(namespace) {
-    return (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(STATE, (k, { key }) => k === namespace(key));
+    return (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.filter)(STATE, (k, { key }) => k === namespace(key));
 }
 function getValues(namespace) {
-    return (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(getNamespaceState(namespace), (k, { key, value }) => [
+    return (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(getNamespaceState(namespace), (k, { key, value }) => [
         key,
         value,
     ]);
@@ -267,7 +287,7 @@ async function onStateChange(changes) {
         }
         updateDependencies(key, changes, realChanges);
     }
-    await (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.runStateChangeListeners)((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(realChanges, (k, v) => !v.isSame));
+    await (0,_listeners__WEBPACK_IMPORTED_MODULE_5__.runStateChangeListeners)((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.filter)(realChanges, (k, v) => !v.isSame));
 }
 function updateDependencies(key, changes, realChanges) {
     STATE[key].dependants?.forEach((name) => {
@@ -293,16 +313,16 @@ function isEveryDependencyReady(dependencies, namespace, changesKeys, realChange
     });
 }
 function getState(namespace, arg) {
-    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isString)(arg)) {
+    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isString)(arg)) {
         return createStore(arg);
     }
-    return (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.recreateStructure)(getValues(namespace));
+    return (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.recreateStructure)(getValues(namespace));
 }
 async function setState(namespace, changes) {
     const storageChanges = {};
-    const updateId = (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.uid)();
+    const updateId = (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.uid)();
     const storageTypes = {};
-    (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.forEach)(changes, (k, v) => {
+    (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.forEach)(changes, (k, v) => {
         const fullKey = namespace(k);
         const { storageType, computeFn, isAction } = STATE[fullKey];
         if (computeFn || isAction) {
@@ -331,16 +351,15 @@ async function setValues(storageType, changes) {
             return;
         }
     }
-    joinStateChanges((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(changes, (k, newValue) => [k, { newValue }]));
+    joinStateChanges((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(changes, (k, newValue) => [k, { newValue }]));
 }
 async function resetState(namespace, keys) {
-    await setState(namespace, getDefaultValues(namespace, keys));
-    return createStore(namespace());
+    return setState(namespace, getDefaultValues(namespace, keys));
 }
 function getDefaultValues(namespace, keys) {
     const namespaceState = getNamespaceState(namespace);
-    return (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.map)(keys
-        ? (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.filter)(namespaceState, (k, { key }) => keys.includes(key))
+    return (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(keys
+        ? (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.filter)(namespaceState, (k, { key }) => keys.includes(key))
         : namespaceState, (k, { key, defaultValue }) => [key, defaultValue]);
 }
 function createPendingChanges(namespace) {
@@ -358,13 +377,15 @@ function createPendingChanges(namespace) {
     };
 }
 function main(namespace) {
-    if (!arguments[1] || (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isString)(arguments[1])) {
+    if (!arguments[1] || (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isString)(arguments[1])) {
         return getState.apply(null, arguments);
     }
-    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isArray)(arguments[1]) || (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isFunction)(arguments[1]) || (0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isAsyncFunction)(arguments[1])) {
-        return _listeners__WEBPACK_IMPORTED_MODULE_4__.addStateListener.apply(null, arguments);
+    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isArray)(arguments[1]) ||
+        (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isFunction)(arguments[1]) ||
+        (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(arguments[1])) {
+        return _listeners__WEBPACK_IMPORTED_MODULE_5__.addStateListener.apply(null, arguments);
     }
-    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isObject)(arguments[1])) {
+    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isObject)(arguments[1])) {
         return setState.apply(null, arguments);
     }
 }
@@ -372,26 +393,26 @@ function setStorageUtils(storageUtils) {
     Object.assign(STORAGE, storageUtils);
 }
 function addNamespace(namespace, str) {
-    return `${namespace}${((0,_helpers__WEBPACK_IMPORTED_MODULE_1__.isString)(str) && _constants__WEBPACK_IMPORTED_MODULE_3__.NAMESPACE_DELIMITER) || ""}${str || ""}`;
+    return `${namespace}${((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isString)(str) && _constants__WEBPACK_IMPORTED_MODULE_4__.NAMESPACE_DELIMITER) || ""}${str || ""}`;
 }
 function createStore(_namespace) {
     const namespace = ((key) => addNamespace(_namespace, key));
     if (!STATE_PENDING_CHANGES[namespace()]) {
         STATE_PENDING_CHANGES[namespace()] = {};
     }
-    if (!_listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()]) {
-        _listeners__WEBPACK_IMPORTED_MODULE_4__.LISTENERS[namespace()] = [];
+    if (!_listeners__WEBPACK_IMPORTED_MODULE_5__.LISTENERS[namespace()]) {
+        _listeners__WEBPACK_IMPORTED_MODULE_5__.LISTENERS[namespace()] = [];
     }
     return Object.assign(main.bind(null, namespace), {
         add: (state) => addState(namespace, state, false),
         addPersistent: (state) => addState(namespace, state, true),
         get: (newNamespace) => getState(namespace, newNamespace),
-        set: async (changes) => await setState(namespace, changes),
+        set: (changes) => setState(namespace, changes),
         reset: (keys) => resetState(namespace, keys),
         changes: createPendingChanges(namespace),
-        onChange: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.addStateListener)(namespace, keys, cb),
-        removeListener: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_4__.removeStateListener)(namespace, keys, cb),
-        actions: (actions) => (0,_actions__WEBPACK_IMPORTED_MODULE_2__.addStateActions)(namespace, actions),
+        onChange: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_5__.addStateListener)(namespace, keys, cb),
+        removeListener: (keys, cb) => (0,_listeners__WEBPACK_IMPORTED_MODULE_5__.removeStateListener)(namespace, keys, cb),
+        actions: (actions) => (0,_actions__WEBPACK_IMPORTED_MODULE_3__.addStateActions)(namespace, actions),
         setStorageUtils,
         joinStateChanges,
         namespace,
@@ -408,6 +429,7 @@ function createStore(_namespace) {
   \**************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   LISTENERS: () => (/* binding */ LISTENERS),
@@ -415,21 +437,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   removeStateListener: () => (/* binding */ removeStateListener),
 /* harmony export */   runStateChangeListeners: () => (/* binding */ runStateChangeListeners)
 /* harmony export */ });
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! . */ "./src/index.ts");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers */ "./src/helpers.ts");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types */ "./src/types.d.ts");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_types__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! . */ "./src/index.ts");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helpers */ "./src/helpers.ts");
+
 
 
 
 const LISTENERS = {};
 async function runStateChangeListeners(realChanges) {
     if (Object.keys(realChanges).length) {
-        const { namespace } = ___WEBPACK_IMPORTED_MODULE_0__.STATE[Object.keys(realChanges)[0]];
+        const { namespace } = ___WEBPACK_IMPORTED_MODULE_1__.STATE[Object.keys(realChanges)[0]];
         for (const [changeKey] of Object.entries(realChanges)) {
-            const { listeners, key } = ___WEBPACK_IMPORTED_MODULE_0__.STATE[changeKey];
+            const { listeners, key } = ___WEBPACK_IMPORTED_MODULE_1__.STATE[changeKey];
             for (const cb of listeners) {
-                const fn = cb.bind(null, [key], (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace()));
-                if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(cb)) {
+                const fn = cb.bind(null, [key], (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace()));
+                if ((0,_helpers__WEBPACK_IMPORTED_MODULE_3__.isAsyncFunction)(cb)) {
                     await fn();
                 }
                 else {
@@ -437,11 +462,11 @@ async function runStateChangeListeners(realChanges) {
                 }
             }
         }
-        const namespaceLength = `${namespace()}${_constants__WEBPACK_IMPORTED_MODULE_1__.NAMESPACE_DELIMITER}`.length;
-        const readableKeys = (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.map)(realChanges, (k) => k.slice(namespaceLength));
+        const namespaceLength = `${namespace()}${_constants__WEBPACK_IMPORTED_MODULE_2__.NAMESPACE_DELIMITER}`.length;
+        const readableKeys = (0,_helpers__WEBPACK_IMPORTED_MODULE_3__.map)(realChanges, (k) => k.slice(namespaceLength));
         for (const cb of LISTENERS[namespace()]) {
-            const fn = cb.bind(null, readableKeys, (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace()));
-            if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(cb)) {
+            const fn = cb.bind(null, readableKeys, (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace()));
+            if ((0,_helpers__WEBPACK_IMPORTED_MODULE_3__.isAsyncFunction)(cb)) {
                 await fn();
             }
             else {
@@ -451,25 +476,25 @@ async function runStateChangeListeners(realChanges) {
     }
 }
 function addStateListener(namespace, observables, cb) {
-    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isFunction)(observables) || (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(observables)) {
+    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_3__.isFunction)(observables) || (0,_helpers__WEBPACK_IMPORTED_MODULE_3__.isAsyncFunction)(observables)) {
         LISTENERS[namespace()].push(observables);
-        return (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace());
+        return (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace());
     }
-    observables.forEach((key) => ___WEBPACK_IMPORTED_MODULE_0__.STATE[namespace(key)].listeners?.push(cb));
-    return (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace());
+    observables.forEach((key) => ___WEBPACK_IMPORTED_MODULE_1__.STATE[namespace(key)].listeners?.push(cb));
+    return (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace());
 }
 function removeStateListener(namespace, observables, removeCb) {
-    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isFunction)(observables) || (0,_helpers__WEBPACK_IMPORTED_MODULE_2__.isAsyncFunction)(observables)) {
+    if ((0,_helpers__WEBPACK_IMPORTED_MODULE_3__.isFunction)(observables) || (0,_helpers__WEBPACK_IMPORTED_MODULE_3__.isAsyncFunction)(observables)) {
         const removeIdx = LISTENERS[namespace()].findIndex((cb) => cb === observables);
         LISTENERS[namespace()].splice(removeIdx, 1);
-        return (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace());
+        return (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace());
     }
     observables.forEach((key) => {
-        const listeners = ___WEBPACK_IMPORTED_MODULE_0__.STATE[namespace(key)].listeners;
+        const listeners = ___WEBPACK_IMPORTED_MODULE_1__.STATE[namespace(key)].listeners;
         const removeIdx = listeners?.findIndex((cb) => cb === removeCb);
         listeners?.splice(removeIdx, 1);
     });
-    return (0,___WEBPACK_IMPORTED_MODULE_0__.createStore)(namespace());
+    return (0,___WEBPACK_IMPORTED_MODULE_1__.createStore)(namespace());
 }
 
 
@@ -481,10 +506,14 @@ function removeStateListener(namespace, observables, removeCb) {
   \************************/
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types */ "./src/types.d.ts");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_types__WEBPACK_IMPORTED_MODULE_0__);
+
 async function updateFromLocalStorage(state) {
     const stored = {};
     for (const key in state) {
@@ -556,6 +585,18 @@ function removeStorageKey(type, key) {
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			const getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter/value functions for harmony exports

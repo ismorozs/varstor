@@ -1,3 +1,5 @@
+import { type INamespace, type IStateActions } from "./types";
+
 import { STATE, createStore } from ".";
 
 export function addStateActions(namespace: INamespace, actions: IStateActions) {
@@ -10,4 +12,6 @@ export function addStateActions(namespace: INamespace, actions: IStateActions) {
       listeners: [],
     };
   }
+
+  return createStore(namespace());
 }

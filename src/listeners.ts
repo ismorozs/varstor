@@ -1,3 +1,11 @@
+import {
+  type INamespace,
+  type IStateListeners,
+  type IStateChanges,
+  type IStateListener,
+  type IValue,
+} from "./types";
+
 import { STATE, createStore } from ".";
 import { NAMESPACE_DELIMITER } from "./constants";
 import { map, isFunction, isAsyncFunction } from "./helpers";
@@ -6,12 +14,13 @@ export const LISTENERS = {} as IStateListeners;
 
 export async function runStateChangeListeners(realChanges: IStateChanges) {
   if (Object.keys(realChanges).length) {
-    const { namespace } =
-      STATE[Object.keys(realChanges)[0] as keyof typeof STATE];
+    const { namespace } = STATE[
+      Object.keys(realChanges)[0] as keyof typeof STATE
+    ] as IValue;
     for (const [changeKey] of Object.entries(realChanges)) {
       const { listeners, key } = STATE[changeKey];
       for (const cb of listeners!) {
-        const fn = cb.bind(null, [key], createStore(namespace()));
+        const fn = cb.bind(null, [key!], createStore(namespace()));
         if (isAsyncFunction(cb)) {
           await fn();
         } else {
@@ -26,11 +35,7 @@ export async function runStateChangeListeners(realChanges: IStateChanges) {
     ) as string[];
 
     for (const cb of LISTENERS[namespace()]) {
-      const fn = cb.bind(
-        null,
-        readableKeys,
-        createStore(namespace())
-      );
+      const fn = cb.bind(null, readableKeys, createStore(namespace()));
       if (isAsyncFunction(cb)) {
         await fn();
       } else {
@@ -43,7 +48,7 @@ export async function runStateChangeListeners(realChanges: IStateChanges) {
 export function addStateListener(
   namespace: INamespace,
   observables: string[] | IStateListener,
-  cb: () => {},
+  cb: IStateListener,
 ) {
   if (isFunction(observables) || isAsyncFunction(observables)) {
     LISTENERS[namespace()].push(observables as IStateListener);
@@ -60,7 +65,7 @@ export function addStateListener(
 export function removeStateListener(
   namespace: INamespace,
   observables: string[] | IStateListener,
-  removeCb: () => {},
+  removeCb: IStateListener,
 ) {
   if (isFunction(observables) || isAsyncFunction(observables)) {
     const removeIdx = LISTENERS[namespace()].findIndex(
@@ -72,8 +77,8 @@ export function removeStateListener(
 
   (observables as string[]).forEach((key) => {
     const listeners = STATE[namespace(key)].listeners;
-    const removeIdx = listeners?.findIndex((cb) => cb === removeCb) as number;
-    listeners?.splice(removeIdx, 1);
+    const removeIdx = listeners?.findIndex((cb) => cb === removeCb);
+    listeners?.splice(removeIdx!, 1);
   });
 
   return createStore(namespace());

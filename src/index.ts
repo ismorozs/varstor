@@ -1,3 +1,18 @@
+import {
+  type IVarstor,
+  type IState,
+  type IStateUpdatePieces,
+  type IStatePendingChanges,
+  type IStorageFunctions,
+  type INamespace,
+  type IStateDefault,
+  type IComputeFunction,
+  type IValue,
+  type IStateChanges,
+  type IStateActions,
+  type IStateListener,
+} from "./types.d";
+
 import storageUtils from "./storage";
 
 import {
@@ -224,13 +239,13 @@ export function getState(namespace: INamespace, arg: string) {
     return createStore(arg);
   }
 
-  return recreateStructure(getValues(namespace));
+  return recreateStructure(getValues(namespace)) as Record<string, any>;
 }
 
 export async function setState(
   namespace: INamespace,
   changes: Record<string, unknown>,
-): Promise<unknown> {
+): Promise<IVarstor> {
   const storageChanges: Record<string, any> = {};
   const updateId = uid();
   const storageTypes = {} as Record<string, boolean>;
@@ -282,9 +297,7 @@ async function setValues(
 }
 
 export async function resetState(namespace: INamespace, keys?: string[]) {
-  await setState(namespace, getDefaultValues(namespace, keys));
-
-  return createStore(namespace());
+  return setState(namespace, getDefaultValues(namespace, keys));
 }
 
 function getDefaultValues(namespace: INamespace, keys?: string[]) {
@@ -303,7 +316,7 @@ export function createPendingChanges(namespace: INamespace) {
     const changes = STATE_PENDING_CHANGES[namespace()];
     STATE_PENDING_CHANGES[namespace()] = {};
     return changes;
-  }
+  };
 
   return {
     add: (changes: Record<string, any>) =>
@@ -319,12 +332,16 @@ export function createPendingChanges(namespace: INamespace) {
   };
 }
 
-function main(namespace: INamespace): any {
+function main(namespace?: INamespace): any {
   if (!arguments[1] || isString(arguments[1])) {
     return getState.apply(null, arguments as unknown as [INamespace, string]);
   }
 
-  if (isArray(arguments[1]) || isFunction(arguments[1]) || isAsyncFunction(arguments[1])) {
+  if (
+    isArray(arguments[1]) ||
+    isFunction(arguments[1]) ||
+    isAsyncFunction(arguments[1])
+  ) {
     return addStateListener.apply(
       null,
       arguments as unknown as [INamespace, string[], () => {}],
@@ -347,7 +364,7 @@ function addNamespace(namespace: string, str: string) {
   return `${namespace}${(isString(str) && NAMESPACE_DELIMITER) || ""}${str || ""}`;
 }
 
-export function createStore(_namespace: string) {
+export function createStore(_namespace: string): IVarstor {
   const namespace = ((key: string) =>
     addNamespace(_namespace, key)) as INamespace;
 
@@ -362,15 +379,14 @@ export function createStore(_namespace: string) {
   return Object.assign(main.bind(null, namespace), {
     add: (state: IStateDefault) => addState(namespace, state, false),
     addPersistent: (state: IStateDefault) => addState(namespace, state, true),
-    get: (newNamespace: string) => getState(namespace, newNamespace),
-    set: async (changes: Record<string, unknown>) =>
-      await setState(namespace, changes),
+    get: (newNamespace?: string) => getState(namespace, newNamespace!),
+    set: (changes: Record<string, unknown>) => setState(namespace, changes),
     reset: (keys: string[]) => resetState(namespace, keys),
     changes: createPendingChanges(namespace),
-    onChange: (keys: string[], cb: () => {}) =>
-      addStateListener(namespace, keys, cb),
-    removeListener: (keys: string[], cb: () => {}) =>
-      removeStateListener(namespace, keys, cb),
+    onChange: (keys: string[] | IStateListener, cb?: IStateListener) =>
+      addStateListener(namespace, keys, cb!),
+    removeListener: (keys: string[] | IStateListener, cb?: IStateListener) =>
+      removeStateListener(namespace, keys, cb!),
     actions: (actions: IStateActions) => addStateActions(namespace, actions),
     setStorageUtils,
     joinStateChanges,

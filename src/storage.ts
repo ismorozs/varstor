@@ -1,3 +1,5 @@
+import { type IStateDefault } from "./types";
+
 async function updateFromLocalStorage(state: IStateDefault) {
   const stored = {} as IStateDefault;
   for (const key in state) {
@@ -29,7 +31,7 @@ async function setStorageValue(
   return false;
 }
 
-function removeStorageKey (type: string, key: string) {
+function removeStorageKey(type: string, key: string) {
   if (type) {
     localStorage.removeItem(key);
   }
